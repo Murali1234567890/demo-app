@@ -8,23 +8,26 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/murali1234567890/demo-app
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - name: Checkout source code
         uses: actions/checkout@v4
 
       - name: Build Docker image
-        run: docker build -t ghcr.io/${{ github.repository }}:${{ github.sha }} .
+        run: docker build -t $IMAGE_NAME:${{ github.sha }} .
 
       - name: Run application container
-        run: docker run -d --name demo-app-test -p 8080:80 ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: docker run -d --name demo-app-test -p 8080:80 $IMAGE_NAME:${{ github.sha }}
 
       - name: Wait for application
         run: |
@@ -50,7 +53,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push Docker image
-        run: docker push ghcr.io/${{ github.repository }}:${{ github.sha }}
+        run: docker push $IMAGE_NAME:${{ github.sha }}
 
       - name: Stop test container
         if: always()
